@@ -8,13 +8,7 @@
 
 import UIKit
 import CoreLocation
-struct Weather: Decodable{
-    let humidity: Int?
-    let pressure: Int?
-    let temp: String?
-//    let temp_max: String?
-//    let temp_min: String?
-}
+
 class WeatherViewController: UIViewController, CLLocationManagerDelegate, changeCityName {
     
     //Constants
@@ -24,7 +18,7 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate, change
 
     //TODO: Declare instance variables here
     var locationManager = CLLocationManager()
-    var weatherData = [Weather]()
+    
     
     //Pre-linked IBOutlets
     @IBOutlet weak var weatherIcon: UIImageView!
@@ -59,10 +53,13 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate, change
         let task = URLSession.shared.dataTask(with: url!) {
             (data, response, error) in
             do {
-                let json = try JSONSerialization.jsonObject(with: data!, options: .mutableContainers)
-                print(json)
-                let weatherData = try JSONDecoder().decode(Weather.self, from: data!)
-                print(weatherData)
+                let json = try JSONSerialization.jsonObject(with: data!, options: .mutableContainers) as! NSDictionary
+                if let temp = json["main"] as? [String: AnyObject]{
+                    let temperature = temp["temp"] as! NSNumber
+                    self.weatherDetailModel.temperature = Int(temperature)
+                    self.updateUIWithWeatherData()
+                }
+              
             } catch {
                 print("error")
             
@@ -83,12 +80,7 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate, change
     
     //Write the updateWeatherData method here:
     func updateWeatherData(json: AnyObject) {
-//        if let main = json["main"]  {
-//            let temp = main!["temp"]
-//            DispatchQueue.main.async {
-//                self.temperatureLabel.text = "t\(temp!)"
-//            }
-//        }
+        temperatureLabel.text = String(weatherDetailModel.temperature)
     }
 
     
@@ -100,9 +92,10 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate, change
     
     //Write the updateUIWithWeatherData method here:
     func updateUIWithWeatherData() {
-        weatherIcon.image = UIImage(named: weatherDetailModel.weatherIconName)
-        temperatureLabel.text = String(weatherDetailModel.temperature)
-        cityLabel.text = weatherDetailModel.city
+        DispatchQueue.main.async {
+            self.temperatureLabel.text = String(self.weatherDetailModel.temperature)
+        }
+        
     }
     
     
