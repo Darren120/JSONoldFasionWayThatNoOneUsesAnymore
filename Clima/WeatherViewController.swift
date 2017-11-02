@@ -8,7 +8,13 @@
 
 import UIKit
 import CoreLocation
-
+struct Weather: Decodable{
+    let humidity: Int?
+    let pressure: Int?
+    let temp: String?
+//    let temp_max: String?
+//    let temp_min: String?
+}
 class WeatherViewController: UIViewController, CLLocationManagerDelegate, changeCityName {
     
     //Constants
@@ -18,7 +24,7 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate, change
 
     //TODO: Declare instance variables here
     var locationManager = CLLocationManager()
-
+    var weatherData = [Weather]()
     
     //Pre-linked IBOutlets
     @IBOutlet weak var weatherIcon: UIImageView!
@@ -52,21 +58,14 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate, change
         print("ok")
         let task = URLSession.shared.dataTask(with: url!) {
             (data, response, error) in
-            print("gay")
-            if error != nil {
-                print("error!")
-            } else {
-                if let contents = data {
-                    do {
-                        // do stuff to this
-                        let myJSON = try JSONSerialization.jsonObject(with: contents, options: JSONSerialization.ReadingOptions.mutableContainers) as AnyObject
-                            print(myJSON)
-                        self.updateWeatherData(json: myJSON)
-                        
-                    } catch {
-                        print(error)
-                    }
-                }
+            do {
+                let json = try JSONSerialization.jsonObject(with: data!, options: .mutableContainers)
+                print(json)
+                let weatherData = try JSONDecoder().decode(Weather.self, from: data!)
+                print(weatherData)
+            } catch {
+                print("error")
+            
             }
         }
         task.resume()
@@ -84,12 +83,12 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate, change
     
     //Write the updateWeatherData method here:
     func updateWeatherData(json: AnyObject) {
-        if let main = json["main"] as? NSDictionary {
-            let temp = main["temp"]
-            DispatchQueue.main.async {
-                self.temperatureLabel.text = "t\(temp!)"
-            }
-        }
+//        if let main = json["main"]  {
+//            let temp = main!["temp"]
+//            DispatchQueue.main.async {
+//                self.temperatureLabel.text = "t\(temp!)"
+//            }
+//        }
     }
 
     
