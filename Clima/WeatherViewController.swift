@@ -72,10 +72,18 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate, change
                     self.weatherDetailModel.city = name
                     
                 }
-                if let id = json["sys"] as? [String: AnyObject] {
-                    let id = id["id"] as! Int
-                    self.weatherDetailModel.condition = id
+                if let weatherArray = json["weather"] as? [[String: AnyObject]] {
+                    let firstItem = weatherArray[0] as [String: AnyObject]
+                    guard firstItem != nil else {return}
+                    
+                        let id = firstItem["id"] as! Int
+                        self.weatherDetailModel.condition = id
+                        print(id)
+                    
+                   
                 }
+                
+                self.updateUIWithWeatherData()
               
             } catch {
                 print("error")
